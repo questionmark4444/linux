@@ -17,23 +17,19 @@
  *
  * Computes: floor(sqrt(x))
  */
-unsigned long int_sqrt(unsigned long x)
-{
-	unsigned long b, m, y = 0;
+u32 int_sqrt64(u64 x) {
+	u32 y = 0;
+	int i = 31;
 
-	if (x <= 1)
-		return x;
+	if (x <= ULONG_MAX)
+		return int_sqrt((unsigned long) x);
 
-	m = 1UL << (__fls(x) & ~1UL);
-	while (m != 0) {
-		b = y + m;
-		y >>= 1;
-
-		if (x >= b) {
-			x -= b;
-			y += m;
+	while (i >= 0) {
+		if ((x >> (i * 2)) >= (1U << i)) {
+			x -= (3U << (i * 2));
+			y |= (1U << i);
 		}
-		m >>= 2;
+		i--;
 	}
 
 	return y;
@@ -46,26 +42,23 @@ EXPORT_SYMBOL(int_sqrt);
  * is expected.
  * @x: 64bit integer of which to calculate the sqrt
  */
-u32 int_sqrt64(u64 x)
-{
-	u64 b, m, y = 0;
+u32 int_sqrt64(u64 x) {
+  u32 y = 0;
+  int i = 31;
 
-	if (x <= ULONG_MAX)
-		return int_sqrt((unsigned long) x);
+  if (x <= ULONG_MAX)
+    return int_sqrt((unsigned long) x);
 
-	m = 1ULL << ((fls64(x) - 1) & ~1ULL);
-	while (m != 0) {
-		b = y + m;
-		y >>= 1;
+  while (i >= 0) {
+    if ((x >> (i * 2)) >= (1U << i)) {
+      x -= (3U << (i * 2));
+      y |= (1U << i);
+    }
+    i--;
+  }
 
-		if (x >= b) {
-			x -= b;
-			y += m;
-		}
-		m >>= 2;
-	}
-
-	return y;
+  return y;
 }
+
 EXPORT_SYMBOL(int_sqrt64);
 #endif
